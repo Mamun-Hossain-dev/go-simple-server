@@ -5,11 +5,9 @@ import (
 	"simple/server"
 )
 
-// global variables
-// var ProductList []database.Product
-
 func main() {
 	server.StartServer()
+
 }
 
 // init function

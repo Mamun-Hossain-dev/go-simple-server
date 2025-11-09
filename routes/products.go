@@ -8,9 +8,10 @@ import (
 func ProductRouter() *http.ServeMux {
 	r := http.NewServeMux()
 
-	r.Handle("POST /create-products", http.HandlerFunc(handlers.CreateProducts))
 	r.Handle("GET /all-products", http.HandlerFunc(handlers.GetProducts))
-	r.Handle("GET /{id}", http.HandlerFunc(handlers.GetProductById))
+	r.Handle("POST /create-product", http.HandlerFunc(handlers.CreateProducts))
+
+	r.Handle("GET /{id}", http.HandlerFunc(handlers.GetProductById)) // regex only numbers
 
 	return r
 }
