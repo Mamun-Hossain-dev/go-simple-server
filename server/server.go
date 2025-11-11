@@ -19,6 +19,7 @@ func StartServer() {
 	// subRouters
 	productRouter := routes.ProductRouter()
 	helloRouter := routes.HelloRouter()
+	usersRouter := routes.UserRouter()
 
 	// Apply middleware chain per group
 	mux.Handle("/api/products/", utils.ChainingMiddlewares(
@@ -35,6 +36,13 @@ func StartServer() {
 		middleware.LogginMiddleware,
 		middleware.TestingMiddleware,
 		middleware.AuthMiddleware,
+	))
+
+	mux.Handle("/api/users/", utils.ChainingMiddlewares(
+		http.StripPrefix("/api/users", usersRouter),
+		middleware.CorsMiddleware,
+		middleware.LogginMiddleware,
+		middleware.TestingMiddleware,
 	))
 
 	fmt.Println("Server is running on port :", cnf.HttpPort)
