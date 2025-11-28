@@ -7,61 +7,109 @@ import (
 	"strconv"
 )
 
-type Handler struct {
-	Service ProductService
+type ProductHandler struct {
+	service ProductService
 }
 
-func NewProductHandler(s ProductService) *Handler {
-	return &Handler{
-		Service: s,
-	}
+func NewProductHandler(service ProductService) *ProductHandler {
+	return &ProductHandler{service: service}
 }
 
-func (h *Handler) GetAllProducts(w http.ResponseWriter, r *http.Request) {
-	data := h.Service.GetAllProducts()
-	res := Response{
-		Message: "Products fetched successfully!",
+// All Products
+func (h *ProductHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
+	data := h.service.GetProducts()
+	response := Response{
+		Message: "Products retrieved successfully",
 		Data:    data,
 	}
-
-	utils.SendData(w, res, http.StatusOK)
+	utils.SendData(w, response, http.StatusOK)
 }
 
-func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
-	var p Product
-
-	if err := json.NewDecoder(r.Body).Decode(&p); err != nil {
-		http.Error(w, "Invalid Request Data", http.StatusBadRequest)
-		return
-	}
-
-	createdProduct := h.Service.StoreProduct(p)
-	res := ProductResponse{
-		Message: "Product created successfully!",
-		Data:    createdProduct,
-	}
-
-	utils.SendData(w, res, http.StatusCreated)
-}
-
-func (h *Handler) GetProductByID(w http.ResponseWriter, r *http.Request) {
+// Single Product by ID
+func (h *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
+	// Extract ID from URL
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid product Id", http.StatusBadRequest)
+		http.Error(w, "Invalid product ID", http.StatusBadRequest)
 		return
 	}
 
-	product, err := h.Service.GetProductByID(id)
+	p, err := h.service.GetProductByID(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, "Product not found", http.StatusNotFound)
 		return
 	}
 
-	res := ProductResponse{
-		Message: "Product fetched successfully!",
-		Data:    *product,
+	response := ProductResponse{
+		Message: "Product retrieved successfully",
+		Data:    *p,
+	}
+	utils.SendData(w, response, http.StatusOK)
+}
+
+// Create Product
+func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
+	var newProduct Product
+	if err := json.NewDecoder(r.Body).Decode(&newProduct); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
 	}
 
-	utils.SendData(w, res, http.StatusOK)
+	createdProduct := h.service.CreateProduct(newProduct)
+	response := ProductResponse{
+		Message: "Product created successfully",
+		Data:    createdProduct,
+	}
+	utils.SendData(w, response, http.StatusCreated)
+}
+
+// Update Product
+func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	var updatedProduct Product
+	if err := json.NewDecoder(r.Body).Decode(&updatedProduct); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
+
+	updated, err := h.service.UpdateProduct(id, updatedProduct)
+	if err != nil {
+		http.Error(w, "Product not found", http.StatusNotFound)
+		return
+	}
+
+	response := ProductResponse{
+		Message: "Product updated successfully",
+		Data:    *updated,
+	}
+	utils.SendData(w, response, http.StatusOK)
+}
+
+// Delete Product
+func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
+
+	deleted, err := h.service.DeleteProduct(id)
+	if err != nil {
+		http.Error(w, "Product not found", http.StatusNotFound)
+		return
+	}
+
+	response := ProductResponse{
+		Message: "Product deleted successfully",
+		Data:    *deleted,
+	}
+	utils.SendData(w, response, http.StatusOK)
 }

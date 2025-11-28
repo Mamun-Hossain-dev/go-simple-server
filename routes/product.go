@@ -13,11 +13,22 @@ func ProductRouter() *http.ServeMux {
 	service := product.NewProductService(repo)
 	handler := product.NewProductHandler(service)
 
-	// protected routes
+	// PUBLIC ROUTES
+	router.HandleFunc("GET /", handler.GetProducts)
+	router.HandleFunc("GET /{id}", handler.GetProduct)
 
-	router.HandleFunc("GET /", handler.GetAllProducts)
-	router.HandleFunc("GET /{id}", handler.GetProductByID)
-	router.Handle("POST /create", middleware.AuthMiddleware(http.HandlerFunc(handler.CreateProduct)))
+	// PROTECTED ROUTES (POST, PUT, DELETE)
+	router.Handle("POST /",
+		middleware.AuthMiddleware(http.HandlerFunc(handler.CreateProduct)),
+	)
+
+	router.Handle("PUT /{id}",
+		middleware.AuthMiddleware(http.HandlerFunc(handler.UpdateProduct)),
+	)
+
+	router.Handle("DELETE /{id}",
+		middleware.AuthMiddleware(http.HandlerFunc(handler.DeleteProduct)),
+	)
 
 	return router
 }
