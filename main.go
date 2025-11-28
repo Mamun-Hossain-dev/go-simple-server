@@ -1,17 +1,10 @@
 package main
 
 import (
-	"simple/database"
-	"simple/server"
+	"simple/cmd/server"
 )
 
 func main() {
 	server.StartServer()
 
-}
-
-// init function
-func init() {
-	// Load Products to productlist
-	database.LoadProducts()
 }

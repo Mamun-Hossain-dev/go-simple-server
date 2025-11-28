@@ -1,4 +1,4 @@
-package database
+package user
 
 type User struct {
 	ID        int    `json:"id"`
@@ -19,26 +19,9 @@ type UserRes struct {
 	Data    User   `json:"data"`
 }
 
-var users []User
-
-// Store user
-func (u User) Store() User {
-	if u.ID != 0 {
-		return u
-	}
-
-	u.ID = len(users) + 1
-	users = append(users, u)
-	return u
-}
-
-// Find user
-func Find(email, pass string) *User {
-	for idx, user := range users {
-		if (user.Email == email) && (user.Password == pass) {
-			return &users[idx]
-		}
-	}
-
-	return nil
+type LoginResponse struct {
+	Message      string `json:"message"`
+	User         User   `json:"user"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
